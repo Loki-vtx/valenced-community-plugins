@@ -27,6 +27,11 @@ function textSelection(node: any): void {
 
 export default plugin({
     start({ cleanup, plugin }) {
+        if (plugin.startedLate) {
+            plugin.requireReload()
+            return
+        }
+
         cleanup(
             getModules(
                 withName('BioText'),
@@ -62,10 +67,5 @@ export default plugin({
                 },
             ),
         )
-
-        if (plugin.startedLate) {
-            plugin.requireReload()
-        }
     },
 })
-// u need to reload if the plugin didn't work
