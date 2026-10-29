@@ -1,4 +1,7 @@
-import { ActionSheetActionCreators, ToastActionCreators } from '@valenced/discord/actions'
+import {
+	ActionSheetActionCreators,
+	ToastActionCreators,
+} from '@valenced/discord/actions'
 import { getAssetIdByName } from '@valenced/assets'
 import { Clipboard } from '@valenced/externals/react-native-clipboard'
 import { getModules } from '@valenced/modules/finders'
@@ -12,8 +15,8 @@ const SHEET_KEY = 'MessageLongPressActionSheet'
 const ROW_KEY = 'copy-proxy-link'
 
 let pendingUrl: string | undefined
-
-const isRowGroup = (x: any) => Array.isArray(x) && x[0]?.type?.name === 'ActionSheetRowGroup'
+const isRowGroup = (x: any) =>
+	Array.isArray(x) && x[0]?.type?.name === 'ActionSheetRowGroup'
 
 function insertRow(children: any[], url: string) {
 	const first = children[0]
@@ -23,7 +26,11 @@ function insertRow(children: any[], url: string) {
 		key: ROW_KEY,
 		label: 'Copy Proxy Link',
 		icon: cloneElement(first.props.icon, {
-			IconComponent: () => createElement(Image, { source: getAssetIdByName('LinkIcon'), style: { width: 24, height: 24 } }),
+			IconComponent: () =>
+				createElement(Image, {
+					source: getAssetIdByName('LinkIcon'),
+					style: { width: 24, height: 24 },
+				}),
 		}),
 		onPress: () => {
 			ActionSheetActionCreators.hideActionSheet()
@@ -32,7 +39,11 @@ function insertRow(children: any[], url: string) {
 		},
 	})
 
-	const idx = children.findIndex((c: any) => typeof c?.props?.label === 'string' && c.props.label.toLowerCase().includes('message link'))
+	const idx = children.findIndex(
+		(c: any) =>
+			typeof c?.props?.label === 'string' &&
+			c.props.label.toLowerCase().includes('message link'),
+	)
 	const out = [...children]
 	if (idx !== -1) out.splice(idx + 1, 0, row)
 	else out.push(row)
@@ -46,7 +57,11 @@ function addRow(node: any, url: string, depth = 0): any {
 		if (isRowGroup(node) && Array.isArray(node[1]?.props?.children)) {
 			const middle = node[1]
 			const out = [...node]
-			out[1] = cloneElement(middle, undefined, ...insertRow(middle.props.children, url))
+			out[1] = cloneElement(
+				middle,
+				undefined,
+				...insertRow(middle.props.children, url),
+			)
 			return out
 		}
 		let changed = false
@@ -70,7 +85,12 @@ export default plugin({
 		const patchedSheets = new WeakSet<object>()
 
 		const patchSheet = (instance: any) => {
-			if (!instance || typeof instance.default !== 'function' || patchedSheets.has(instance)) return
+			if (
+				!instance ||
+				typeof instance.default !== 'function' ||
+				patchedSheets.has(instance)
+			)
+				return
 			patchedSheets.add(instance)
 			cleanup(
 				after(instance, 'default', (tree: any) => {
@@ -87,24 +107,31 @@ export default plugin({
 		}
 
 		cleanup(
-		getModules(withProps('openLazy', 'hideActionSheet'), (sheets: any) => {
-		cleanup(
-		before(sheets, 'openLazy', (args: any[]) => {
-		const [sheet, key, props] = args
-		pendingUrl = undefined
-		if (key !== SHEET_KEY) return args
-		const message = props?.message
-		const att = message?.attachments?.[0]
-		const emb = message?.embeds?.[0]?.image
-		const proxyUrl = att?.proxy_url || att?.proxyURL || emb?.proxyURL || emb?.proxy_url
-		if (!proxyUrl) return args
-		pendingUrl = proxyUrl
-		Promise.resolve(sheet).then(patchSheet).catch(reportError)
-			return args
-            			}),
-			)
-		}),
-	)
-	console.log(`${TAG} started`)
-    	},
+			getModules(withProps('openLazy', 'hideActionSheet'), (sheets: any) => {
+				cleanup(
+					before(sheets, 'openLazy', (args: any[]) => {
+						const [sheet, key, props] = args
+						pendingUrl = undefined
+						if (key !== SHEET_KEY) return args
+
+						const message = props?.message
+						const att = message?.attachments?.[0]
+						const emb = message?.embeds?.[0]?.image
+						const proxyUrl =
+							att?.proxy_url ||
+							att?.proxyURL ||
+							emb?.proxyURL ||
+							emb?.proxy_url
+						if (!proxyUrl) return args
+
+						pendingUrl = proxyUrl
+						Promise.resolve(sheet).then(patchSheet).catch(reportError)
+						return args
+					}),
+				)
+			}),
+		)
+
+		console.log(`${TAG} started`)
+	},
 })
