@@ -1,8 +1,8 @@
 {
 	"format": 1,
-	"id": "dev.loki-vtx.copybios",
-	"name": "Copy Bios",
-	"description": "Makes bio text in profiles selectable.",
+	"id": "dev.loki-vtx.selectablebios",
+	"name": "Selectable Bios",
+	"description": "Makes profile 'About Me' text selectable, allowing you to copy and share it.",
 	"author": "Loki-vtx <918437723755384832> (https://github.com/Loki-vtx \"GitHub\")",
 	"icon": "PencilIcon",
 	"version": "1.0.0",
